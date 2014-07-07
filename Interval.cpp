@@ -28,11 +28,17 @@ void Interval::_Normalize() throw()
 }
 
 
-Interval::PairT Interval::GetValue() const throw()
+const Interval::PairT& Interval::GetValue() const throw()
 {
     return _coordinates;
 }
 
+
+bool Interval::Containe(const Interval &a) const throw()
+{
+    return _coordinates.first <= a._coordinates.first &&
+           _coordinates.second >= a._coordinates.second;
+}
 
 bool Interval::operator< (const Interval &a) const
 {

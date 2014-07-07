@@ -4,7 +4,7 @@
 
 #include <boost/thread/shared_mutex.hpp>
 
-#include <set>
+#include <map>
 
 class IntervalStorage
 {
@@ -15,11 +15,11 @@ public:
     void Remove(const Interval &) throw();
 
     Interval::PtrT Search(const Interval &) const throw();
+
+    typedef std::map<Interval, const Interval*> MapT;
 private:
+    void _Rebuild() throw();
 
     mutable boost::shared_mutex _mapGuard;
-
-    typedef std::set<Interval> SetT;
-    SetT _intervals;
-
+    MapT _intervals;
 };

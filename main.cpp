@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
         Http::HttpHandlerFabrica httpHandlerFabrica(intervalStorage);
         Network::Server netSrv(netInterface, port, numThreads, httpHandlerFabrica);
 
-        cout << "Server initialized.\nRun ...\n" << flush;
+        cout << "Server initialized.\nFor exit press Ctrl+c\nRun ...\n" << flush;
 
         netSrv.Run();
     }
