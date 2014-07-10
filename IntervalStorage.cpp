@@ -28,10 +28,12 @@ private:
     const Interval *_maxLeftCoordinate;
 };
 
+
 IntervalStorage::IntervalStorage()
 {
 
 }
+
 
 void IntervalStorage::Add(const Interval &interval) throw()
 {

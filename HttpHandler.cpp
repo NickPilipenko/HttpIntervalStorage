@@ -61,7 +61,7 @@ void HttpHandler::_Handle(const Request& request)
             if (_intervalMore)
                 _answer.assign(_responseBuilder.Build(_toString(*_intervalMore)));
             else
-                _answer.assign(_responseBuilder.Build("Is absent"));
+                _answer.assign(_responseBuilder.Build("[]"));
         }
         break;
 
