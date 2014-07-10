@@ -4,6 +4,8 @@ first_interval="[0, 5]"
 first_interval_ok=("[0, 5]" "[0, 3]" "[2, 5]" "[0, 0]" "[5, 5]" "[1, 3]")
 first_interval_absent=("[-5, -2]" "[-3, 0]" "[-2, 1]" "[-4, 5]" "[-1, 6]" "[0, 8]" "[3, 7]" "[5, 10]" "[8, 17]")
 
+
+
 OK=".... OK"
 ERROR=". ERROR"
 NOT_IMP="NOT IMP"
@@ -30,7 +32,7 @@ function AddInterval {
 }
 
 function RemoveInterval {
-	local res=$(curl -X REMOVE -d "$1" localhost:8080)
+	local res=$(curl --silent -X REMOVE -d "$1" localhost:8080)
 	[[ $? ]]|| crush
 	[[ $res == "REMOVE" ]] 
 }
@@ -90,14 +92,20 @@ echo $NOT_IMP
 printf " Multy interval ........................................"
 echo $NOT_IMP
 #
-printf " Remove interval ......................................."
-echo $NOT_IMP
+printf " Remove intervals ......................................"
+RemoveInterval "$first_interval"
+[ $? ]||crush
+echo $OK
 #
 printf " Second single interval ................................"
 echo $NOT_IMP
 #
-printf " Empty storage ........................................."
+printf " Remove last interval .................................."
 echo $NOT_IMP
+#
+printf " Empty storage ........................................."
+EmptySrorageTest
+echo $OK
 #
 
 echo   "==============================================================="
