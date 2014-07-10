@@ -1,11 +1,21 @@
 #!/usr/bin/bash
 
-first_interval="[0,5]"
-first_interval_ok=("[0,5]" "[0,3]" "[2,5]" "[0,0]" "[5,5]" "[1,3]")
-first_interval_absent=("[-5,-2]" "[-3,0]" "[-2,1]" "[-4,5]" "[-1,6]" "[0,8]" "[3,7]" "[5,10]" "[8,17]")
+first_interval="[0, 5]"
+first_interval_ok=("[0, 5]" "[0, 3]" "[2, 5]" "[0, 0]" "[5, 5]" "[1, 3]")
+first_interval_absent=("[-5, -2]" "[-3, 0]" "[-2, 1]" "[-4, 5]" "[-1, 6]" "[0, 8]" "[3, 7]" "[5, 10]" "[8, 17]")
 
-OK="... OK"
-ERROR=" ERROR"
+OK=".... OK"
+ERROR=". ERROR"
+NOT_IMP="NOT IMP"
+
+set -e
+function cleanup {
+	if [[ $pid_server != "" ]];
+	then
+		kill -SIGINT $pid_server
+	fi
+}
+trap cleanup EXIT
 
 function crush {
 	echo $ERROR
@@ -14,35 +24,49 @@ function crush {
 }
 
 function AddInterval {
-	local res=$(curl -X ADD -d $1 localhost:8080)
-	[[ $? -ne 0 ]]&& crush
+	local res=$(curl --silent -X ADD -d "$1" localhost:8080)
+	[[ $? ]]|| crush
 	[[ $res == "ADD" ]] 
 }
 
 function RemoveInterval {
-	local res=$(curl -X REMOVE -d $1 localhost:8080)
-	[[ $? -ne 0 ]]&& crush
+	local res=$(curl -X REMOVE -d "$1" localhost:8080)
+	[[ $? ]]|| crush
 	[[ $res == "REMOVE" ]] 
 }
 
 function SearchInterval {
-	result =$(curl -X SEARCH -d $1 localhost:8080)
-	[[ $? -ne 0 ]]&& crush
+	result=$(curl --silent -X SEARCH -d "$1" localhost:8080)
+	[[ $? ]]|| crush
 }
 
 function EmptySrorageTest {
-	for i in first_interval_ok;
+	for i in "${first_interval_ok[@]}"
 	do
-		SearchInterval i
-		[[ $result != "[]" ]]&& crush
-	done;	
+		SearchInterval "$i"
+		[[ $result == "[]" ]]|| crush 
+	done
+}
+
+function FirstIntervalTest {
+	for i in "${first_interval_ok[@]}"
+	do
+		SearchInterval "$i"
+		[[ "$result" == "$first_interval" ]]|| crush 
+	done
+	
+	for i in "${first_interval_absent[@]}"
+	do
+		SearchInterval "$i"
+		[[ $result == "[]" ]]|| crush 
+	done
 }
 
 echo 
 echo   "==============================================================="
 echo   "                Test for HttpIntervalStorage"
 echo   "==============================================================="
-printf " SERVER START ..........................................."
+printf " SERVER START .........................................."
 
 ./HttpIntervalStorage &>/dev/null &
 pid_server=$!
@@ -50,30 +74,37 @@ sleep 2
 [[ $pid_server -ne 0 ]]&& echo $OK || crush
 	
 echo   "==============================================================="
-printf " Empty storage .........................................."
+printf " Empty storage ........................................."
 EmptySrorageTest
 echo $OK
 #
-printf " Single interval ........................................"
+printf " Single interval ......................................."
+AddInterval "$first_interval"
+[ $? ]||crush
+FirstIntervalTest
 echo $OK
 #
-printf " Multy interval order ..................................."
-echo $OK
+printf " Multy interval order .................................."
+echo $NOT_IMP
 #
-printf " Multy interval ........................................."
-echo $OK
+printf " Multy interval ........................................"
+echo $NOT_IMP
 #
-printf " Second single interval ................................."
-echo $OK
+printf " Remove interval ......................................."
+echo $NOT_IMP
 #
-printf " Empty storage .........................................."
-echo $OK
+printf " Second single interval ................................"
+echo $NOT_IMP
+#
+printf " Empty storage ........................................."
+echo $NOT_IMP
 #
 
 echo   "==============================================================="
-printf " SERVER STOP ............................................"
+printf " SERVER STOP ..........................................."
 kill -SIGINT $pid_server
 [[ $? -eq 0 ]]&& echo $OK || crush
+pid_server=""
 echo   "==============================================================="
 echo   "SUCCESS"
 
