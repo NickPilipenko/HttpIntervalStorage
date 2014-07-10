@@ -1,7 +1,5 @@
 #include "IntervalStorage.hpp"
 
-#include <iostream>
-
 class IntervalStorageUpdater
 {
 public:
@@ -61,28 +59,10 @@ Interval::PtrT IntervalStorage::Search(const Interval &interval) const throw()
 {
     boost::shared_lock<boost::shared_mutex> readLock(_mapGuard);
 
-    for(MapT::const_iterator i = _intervals.begin();
-        i != _intervals.end();
-        ++i)
-        {
-            std::cout << "[" << i->first.GetValue().first << "," << i->first.GetValue().second << "]"
-                      << " => [" << i->second->GetValue().first << "," << i->second->GetValue().second << "]" << std::endl;
-
-        }
-    std::cout << std::endl  << std::endl << std::flush;
-
     MapT::const_iterator _iteratoLower = _intervals.upper_bound(interval);
     if (!_intervals.empty() && _iteratoLower != _intervals.begin())
     {
         --_iteratoLower;
-
-        std::cout << "[" << interval.GetValue().first << "," << interval.GetValue().second << "]" << std::endl;
-
-        std::cout << "[" << _iteratoLower->first.GetValue().first << "," << _iteratoLower->first.GetValue().second << "]"
-                  << " => [" << _iteratoLower->second->GetValue().first << "," << _iteratoLower->second->GetValue().second << "]" << std::endl;
-
-        std::cout << std::endl << "=================================================" << std::endl << std::flush;
-
 
         if (_iteratoLower->second->Containe(interval))
             return Interval::PtrT(new Interval(*(_iteratoLower->second)));
